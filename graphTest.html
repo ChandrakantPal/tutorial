@@ -1,0 +1,96 @@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div id="container"></div>
+<script>
+     
+$.post('getArray.php', {}, function(data){
+    //processing data(2D array)
+
+    var valueToPass = [];    //variable to send to the user defined drawChart() function defined in the next block
+    var arrayLength = data.length;
+    for (var i = 0; i < arrayLength; i++) {
+
+        //extracting data from each array in the  2D array
+        var t_year = data[i][0];
+        var t_month = data[i][1];
+        var t_day = data[i][2];
+        var t_hours = data[i][3];
+        var t_mins = data[i][4];
+        var t_secs = data[i][5];
+        var t_value = data[i][6];
+
+
+        /* a "datetime" type graph in highcharts requires series data(data to be plotted) in the following form
+            series: {
+                data = [ [DATE, datavalue], [DATE, dataValue], ..... ]
+                }
+
+            the following two line acchieve this by appending the "valueToPass" array in the required format
+        */
+        
+        var date_UTC = Date.UTC(t_year, t_month-1, t_day, t_hours, t_mins, t_secs);
+        valueToPass.push([date_UTC, t_value]);
+    }
+
+    drawChart(valueToPass);
+}, 'json');
+
+
+function drawChart(array_param) {
+
+    Highcharts.chart('container', {
+
+  title: {
+    text: 'Light Sensor'
+  },
+
+  subtitle: {
+    text: 'Letcetra Agritech Pvt Ltd.'
+  },
+
+  yAxis: {
+    title: {
+      text: 'Lumens'
+    }
+  },
+
+  xAxis: {
+      title: {
+      text: 'Time'
+    },
+  type: 'datetime',
+  dateTimeLabelFormats: {
+    minute: '%H:%M',
+    }
+  },
+
+  legend: {
+    layout: 'vertical',
+    align: 'right',
+    verticalAlign: 'middle'
+  },
+
+  series: [{
+    name: 'Readings',
+    data: array_param
+  }],
+
+  responsive: {
+    rules: [{
+      condition: {
+        maxWidth: 500
+      },
+      chartOptions: {
+        legend: {
+          layout: 'horizontal',
+          align: 'center',
+          verticalAlign: 'bottom'
+        }
+      }
+    }]
+  }
+
+});
+}
+ </script>
